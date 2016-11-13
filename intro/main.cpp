@@ -29,6 +29,7 @@ int main(int argc, char **argv)
 	server_name.sin_addr.s_addr=INADDR_ANY;
 	server_name.sin_port = htons(PORT);
 	memset(&(server_name.sin_zero),'\0',8);
+
     int _set=1;
     iResult = setsockopt(server, SOL_SOCKET, SO_REUSEADDR, (char *) &_set, sizeof(int));
     if (iResult == sockError) {
@@ -61,6 +62,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
     cout << "\t>> Server is ready to accept incomming calls." << endl;
+
     string responseMessage1="Please enter the requested domain name for name resolution: ";
     string responseMessage2="INFO: Too long peer request. Maximum length is 200 bytes.";
 
@@ -173,7 +175,9 @@ int main(int argc, char **argv)
         }
         close(call);
     }
+
     close(server);
 	cout << " << Server is now terminating." << endl;
+	
     return 0;
 }

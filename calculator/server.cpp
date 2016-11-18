@@ -100,15 +100,18 @@ int main(int argc, char **argv)
 			// parse the request
 			struct ReqMsg req;
 			memcpy(&req, puffer, sizeof(struct ReqMsg));
+			req.a = ntohs(req.a);
+			req.b = ntohs(req.b);
 			cout << "Received: " << req.a << req.op << req.b << endl;
 
 			// process the request
-			struct ReplyMsg rep;
-			rep.result = req.op == '+' ? req.a + req.b : req.a * req.b;
-			cout << "Result: " << rep.result << endl;
+			struct ReplyMsg resp;
+			resp.result = req.op == '+' ? req.a + req.b : req.a * req.b;
+			cout << "Result: " << resp.result << endl;
 
 			// send the response
-			int sentBytes = send(call,&rep,sizeof(rep),0);
+			resp.result = htons(resp.result);
+			int sentBytes = send(call,&resp,sizeof(resp),0);
 			if(sentBytes == SO_ERROR) cerr << "Failed the send the reply to the client: " << errno << endl;
 			else cout << "Result has been posted to client." << endl;
 		}

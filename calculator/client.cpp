@@ -52,11 +52,11 @@ int main(int argc, char **argv)
 
 	// send the request
 	struct ReqMsg req;
-	req.a = 2;
-	req.b = 16;
+	req.a = htons(2);
+	req.b = htons(16);
 	req.op = '+';
 	send(client, &req, sizeof(req), 0);
-	cout << "Message sent: " << req.a << req.op << req.b << endl;
+	cout << "Message sent: " << ntohs(req.a) << req.op << ntohs(req.b) << endl;
 
 	// wait for the response
 	struct ReplyMsg response;
@@ -65,6 +65,7 @@ int main(int argc, char **argv)
 		cout << "The recv call failed with error: " << errno << endl;
         close(client);
 	}
+	response.result = ntohs(response.result);
 	cout << "Response: " << response.result << endl;
 
 	// terminating the client

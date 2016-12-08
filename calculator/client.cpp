@@ -29,7 +29,7 @@ struct ReplyMsg
 int main(int argc, char **argv)
 {
 	// create the socket file descriptor
-    int client = socket(AF_INET,SOCK_STREAM,0);
+    int client = socket(AF_INET, SOCK_STREAM, 0);
 	if(client == SO_ERROR) {
   		cerr << "Opening stream socket failed. ERROR:" << errno << endl;
   		return 1;
@@ -52,11 +52,11 @@ int main(int argc, char **argv)
 
 	// send the request
 	struct ReqMsg req;
-	req.a = htons(2);
-	req.b = htons(16);
+	req.a = htonl(2);
+	req.b = htonl(16);
 	req.op = '+';
 	send(client, &req, sizeof(req), 0);
-	cout << "Message sent: " << ntohs(req.a) << req.op << ntohs(req.b) << endl;
+	cout << "Message sent: " << ntohl(req.a) << req.op << ntohl(req.b) << endl;
 
 	// wait for the response
 	struct ReplyMsg response;
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 		cout << "The recv call failed with error: " << errno << endl;
         close(client);
 	}
-	response.result = ntohs(response.result);
+	response.result = ntohl(response.result);
 	cout << "Response: " << response.result << endl;
 
 	// terminating the client

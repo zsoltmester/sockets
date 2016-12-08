@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     // print out server info
     struct sockaddr_in serverInfo;
     socklen_t serverInfoLength = sizeof(serverInfo);
-	result = getsockname( server, (struct sockaddr *) &serverInfo, &serverInfoLength);
+	result = getsockname(server, (struct sockaddr *) &serverInfo, &serverInfoLength);
     if(result == SO_ERROR)
 	{
         cerr << "Getting socket failed." << endl;
@@ -87,21 +87,18 @@ int main(int argc, char **argv)
 		// accept a client
 		struct sockaddr_in caller;
 		socklen_t addrlen = sizeof(caller);
-		int call = accept(server,(struct sockaddr *) &caller, &addrlen);
+		int call = accept(server, (struct sockaddr *) &caller, &addrlen);
 
 		// wait for a request and send the sesponse
-		char* puffer = new char[REQ_MAX_LENGTH];
-		memset(puffer, '\0', REQ_MAX_LENGTH);
-		int receivedBytes = recv(call, puffer, REQ_MAX_LENGTH, 0);
+		struct ReqMsg req;
+		int receivedBytes = recv(call, &req, sizeof(req), 0);
 		if(receivedBytes == 0) cout << "Connection closed by peer." << endl;
-		else if(receivedBytes<  0) cout << "The recv call failed with error: " << errno << endl;
+		else if(receivedBytes < 0) cout << "The recv call failed with error: " << errno << endl;
 		else if (receivedBytes < REQ_MAX_LENGTH)
 		{
 			// parse the request
-			struct ReqMsg req;
-			memcpy(&req, puffer, sizeof(struct ReqMsg));
-			req.a = ntohs(req.a);
-			req.b = ntohs(req.b);
+			req.a = ntohl(req.a);
+			req.b = ntohl(req.b);
 			cout << "Received: " << req.a << req.op << req.b << endl;
 
 			// process the request
@@ -110,20 +107,21 @@ int main(int argc, char **argv)
 			cout << "Result: " << resp.result << endl;
 
 			// send the response
-			resp.result = htons(resp.result);
-			int sentBytes = send(call,&resp,sizeof(resp),0);
-			if(sentBytes == SO_ERROR) cerr << "Failed the send the reply to the client: " << errno << endl;
-			else cout << "Result has been posted to client." << endl;
+			resp.result = htonl(resp.result);
+			errno = 0;
+			int sentBytes = send(call, &resp, sizeof(resp), 0);
+			if (errno == 0) cout << "Result has been posted to client." << endl;
+			else cerr << "Failed the send the reply to the client: " << errno << endl;
 		}
 		else
 		{
 			cerr << "Too long request." << endl;
-			int sentBytes = send(call,REQ_MAX_LENGTH_MSG.c_str(),strlen(REQ_MAX_LENGTH_MSG.c_str()),0);
-			if(sentBytes == SO_ERROR) cerr << "Info has not been send to client, because an error occured: "
+			errno = 0;
+			int sentBytes = send(call, REQ_MAX_LENGTH_MSG.c_str(), strlen(REQ_MAX_LENGTH_MSG.c_str()), 0);
+			if (errno == 0) cout << "Info has been posted to client." << endl;
+			else cerr << "Info has not been send to client, because an error occured: "
 				<< errno << endl;
-			else cout << "Info has been posted to client." << endl;
 		}
-		delete puffer;
 
 		close(call);
 	}

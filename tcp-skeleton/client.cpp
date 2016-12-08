@@ -43,6 +43,8 @@ int main(int argc, char **argv)
 		return 2;
 	}
 
+    communicateWithServer(client);
+
 	// terminating the client
 	cout << "Client is now terminating... ";
 	close(client);

@@ -2,8 +2,10 @@
 #define SO_ERROR -1
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <sstream>
+#include <time.h>
 
 #include <netdb.h>
 #include <sys/types.h>
@@ -16,7 +18,25 @@
 using namespace std;
 
 void communicateWithServer(int client) {
+	srand(time(NULL));
+	bool running = true;
+	while (running) {
+		int number = rand() % 100 + 1;
+		int opIndex = rand() % 3;
+		char op;
+		if (opIndex == 0) op = '<';
+		else if (opIndex == 1) op = '=';
+		else if (opIndex == 2) op = '>';
 
+		std::ostringstream oss;
+		oss << op << number;
+		string message = oss.str();
+		cout << "Sending message: " << message << endl;
+		send(client, message.c_str(), message.length(), 0);
+
+		// TODO
+		break;
+	}
 }
 
 int main(int argc, char **argv)
@@ -42,6 +62,8 @@ int main(int argc, char **argv)
 		close(client);
 		return 2;
 	}
+
+	communicateWithServer(client);
 
 	// terminating the client
 	cout << "Client is now terminating... ";

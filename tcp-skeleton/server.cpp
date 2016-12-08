@@ -15,15 +15,6 @@
 
 using namespace std;
 
-void acceptClient(int server, int client, fd_set master, int & maxfd) {
-	struct sockaddr_in caller;
-	socklen_t addrlen = sizeof(caller);
-	int call = accept(server, (struct sockaddr *) &caller, &addrlen);
-	cout << "A client joined..." << endl;
-	FD_SET(call, &master);
-	if (maxfd < call) maxfd = call;
-}
-
 void handleClientRequest(int client) {
 
 }
@@ -97,7 +88,12 @@ int main(int argc, char **argv)
 			}
 
 			if (i == server) {
-				acceptClient(server, i, master, maxfd);
+				struct sockaddr_in caller;
+				socklen_t addrlen = sizeof(caller);
+				int call = accept(server, (struct sockaddr *) &caller, &addrlen);
+				cout << "A client joined..." << endl;
+				FD_SET(call, &master);
+				if (maxfd < call) maxfd = call;
 			} else {
 				handleClientRequest(i);
 			}

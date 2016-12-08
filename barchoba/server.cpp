@@ -2,8 +2,10 @@
 #define SO_ERROR -1
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <sstream>
+#include <time.h>
 
 #include <netdb.h>
 #include <sys/types.h>
@@ -15,17 +17,25 @@
 
 using namespace std;
 
-void acceptClient(int server, int client, fd_set master, int & maxfd) {
-	struct sockaddr_in caller;
-	socklen_t addrlen = sizeof(caller);
-	int call = accept(server, (struct sockaddr *) &caller, &addrlen);
-	cout << "A client joined..." << endl;
-	FD_SET(call, &master);
-	if (maxfd < call) maxfd = call;
-}
+bool handleClientRequest(int client) {
+	char* buff = new char[200];
+	memset(buff, '\0', 200);
+	int receivedBytes = recv(client, buff, 200, 0);
+	if (receivedBytes == 0) {
+		cout << "Connection closed by peer." << endl;
+		close(client);
+		return false;
+	} else if (receivedBytes < 0) {
+		cout << "The recv call failed with error: " << errno << endl;
+		return false;
+	}
 
-void handleClientRequest(int client) {
+	char op = buff[0];
+	char subbuff[receivedBytes];
+	memcpy(subbuff, &buff[1], receivedBytes);
+	subbuff[receivedBytes] = '\0';
 
+	cout << "Received from client: " << op << subbuff << endl;
 }
 
 int main(int argc, char **argv)
@@ -87,6 +97,9 @@ int main(int argc, char **argv)
 	FD_ZERO(&master); // clear the master socket descriptor set
 	FD_SET(server, &master); // add the server socket descriptor to the master sd set
 
+	srand(time(NULL));
+	int random = rand() % 100 + 1;
+
 	while (true)
 	{
 		readfds = master;
@@ -97,9 +110,15 @@ int main(int argc, char **argv)
 			}
 
 			if (i == server) {
-				acceptClient(server, i, master, maxfd);
+				struct sockaddr_in caller;
+				socklen_t addrlen = sizeof(caller);
+				int call = accept(server, (struct sockaddr *) &caller, &addrlen);
+				cout << "A client joined..." << endl;
+				FD_SET(call, &master);
+				if (maxfd < call) maxfd = call;
 			} else {
-				handleClientRequest(i);
+				bool guessed = handleClientRequest(i);
+				// TODO
 			}
 		}
 	}

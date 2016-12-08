@@ -50,23 +50,31 @@ int main(int argc, char **argv)
 		return 2;
 	}
 
-	// send the request
-	struct ReqMsg req;
-	req.a = htonl(2);
-	req.b = htonl(16);
-	req.op = '+';
-	send(client, &req, sizeof(req), 0);
-	cout << "Message sent: " << ntohl(req.a) << req.op << ntohl(req.b) << endl;
+	while (true) {
+		cout << "Please give the operation..." << endl;
+		// send the request
+		struct ReqMsg req;
+		cout << "a: " << endl;
+		cin >> req.a;
+		cout << "b: " << endl;
+		cin >> req.b;
+		cout << "op (+,-): " << endl;
+		cin >> req.op;
+		req.a = htonl(req.a);
+		req.b = htonl(req.b);
+		send(client, &req, sizeof(req), 0);
+		cout << "Message sent: " << ntohl(req.a) << req.op << ntohl(req.b) << endl;
 
-	// wait for the response
-	struct ReplyMsg response;
-	int receivedBytes = recv(client, &response, sizeof(response), 0);
-	if(receivedBytes < 0){
-		cout << "The recv call failed with error: " << errno << endl;
-        close(client);
+		// wait for the response
+		struct ReplyMsg response;
+		int receivedBytes = recv(client, &response, sizeof(response), 0);
+		if(receivedBytes < 0){
+			cout << "The recv call failed with error: " << errno << endl;
+	        close(client);
+		}
+		response.result = ntohl(response.result);
+		cout << "Response: " << response.result << endl;
 	}
-	response.result = ntohl(response.result);
-	cout << "Response: " << response.result << endl;
 
 	// terminating the client
 	cout << "Client is now terminating... ";

@@ -88,6 +88,7 @@ int main(int argc, char **argv)
 		struct sockaddr_in caller;
 		socklen_t addrlen = sizeof(caller);
 		int call = accept(server, (struct sockaddr *) &caller, &addrlen);
+		cout << "A client joined..." << endl;
 
 		// wait for a request and send the sesponse
 		struct ReqMsg req;

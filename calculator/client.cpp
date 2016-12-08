@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 		cin >> req.a;
 		cout << "b: " << endl;
 		cin >> req.b;
-		cout << "op (+,-): " << endl;
+		cout << "op (+,*): " << endl;
 		cin >> req.op;
 		req.a = htonl(req.a);
 		req.b = htonl(req.b);
